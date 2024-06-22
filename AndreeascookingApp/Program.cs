@@ -1,0 +1,130 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using MySql.Data.MySqlClient;
+
+namespace AndreeascookingApp
+{
+    internal class Program
+    {
+        private static Aperitive[] a = new Aperitive[]
+        {
+            new Aperitive(1,"Mini rulouri de sunca", "(mușchi file, șuncă presată) cu cremă de hrean cu smântână și castraveciori acri (cornichon)", 15, 1, 1 ),
+            new Aperitive(2,"Ruladă de jambon cu cremă de brânză","(de vaci + burduf) cu ceapă verde și ardei colorați servită pe felie de castravete", 25, 2, 2),
+            new Aperitive(3,"Mini broșete (frigărui, scobitori) cu salam","cu salam crud-uscat cu crustă de ceapă și usturoi, caș maturat sau telemea, ardei gras colorat și măsline", 35, 3, 3),
+            new Aperitive(4,"Ouă umplute cu cremă de brânză","și cepșoară + chipsuri crocante de mușchiuleț", 45, 4, 4),
+        };
+
+        static void Main(string[] args)
+        {
+            CreareDB();
+            Console.ReadLine();
+        }
+
+        static private void CreareDB()
+        {
+            string connectionString = "Server=localhost;Uid=root;";
+
+            using (MySqlConnection con = new MySqlConnection(connectionString))
+            {
+                con.Open();
+                MySqlCommand cmd = new MySqlCommand("CREATE DATABASE IF NOT EXISTS Andreeascooking", con);
+                cmd.ExecuteNonQuery();
+
+                cmd.CommandText = "USE Andreeascooking";
+                cmd.ExecuteNonQuery();
+
+                
+                cmd.CommandText = "CREATE TABLE IF NOT EXISTS retete (retete_id int NOT NULL AUTO_INCREMENT, nume varchar(255), descriere text, PRIMARY KEY (retete_id)) ";
+                cmd.ExecuteNonQuery();
+
+                
+                cmd.CommandText = "CREATE TABLE IF NOT EXISTS ingrediente(id int NOT NULL AUTO_INCREMENT, nume varchar(255), PRIMARY KEY (id)) ";
+                cmd.ExecuteNonQuery();
+
+                
+                cmd.CommandText = "CREATE TABLE IF NOT EXISTS aperitive (id int NOT NULL AUTO_INCREMENT, nume varchar(255), descriere text, pret decimal, reteta_id int, ingredient_id int, PRIMARY KEY (id), FOREIGN KEY (reteta_id) REFERENCES retete(retete_id), FOREIGN KEY (ingredient_id) REFERENCES ingrediente(id))";
+                cmd.ExecuteNonQuery();
+
+                Console.WriteLine("Baza de date Andreeascooking a fost creata sau exista deja");
+                Console.WriteLine("Tabelele au fost create cu succes.");
+
+                
+                PopuleazaTabele(con);
+            }
+        }
+
+        private static void PopuleazaTabele(MySqlConnection con)
+        {
+            using (MySqlTransaction tx = con.BeginTransaction())
+            {
+                try
+                {
+                    MySqlCommand com = con.CreateCommand();
+
+                    
+                    com.CommandText = "INSERT INTO retete (nume, descriere) VALUES (@nume, @descriere)";
+                    foreach (var reteta in a)
+                    {
+                        com.Parameters.AddWithValue("@nume", reteta.Nume);
+                        com.Parameters.AddWithValue("@descriere", reteta.Descriere);
+                        com.ExecuteNonQuery();
+                        com.Parameters.Clear();
+                    }
+
+                    
+                    com.CommandText = "INSERT INTO ingrediente (nume) VALUES (@nume)";
+                    foreach (var reteta in a)
+                    {
+                        com.Parameters.AddWithValue("@nume", reteta.Descriere); 
+                        com.ExecuteNonQuery();
+                        com.Parameters.Clear();
+                    }
+
+                    
+                    com.CommandText = "INSERT INTO aperitive (nume, descriere, pret, reteta_id, ingredient_id) VALUES (@nume, @descriere, @pret, @reteta_id, @ingredient_id)";
+                    foreach (var aperitiv in a)
+                    {
+                        com.Parameters.AddWithValue("@nume", aperitiv.Nume);
+                        com.Parameters.AddWithValue("@descriere", aperitiv.Descriere);
+                        com.Parameters.AddWithValue("@pret", aperitiv.Pret);
+                        com.Parameters.AddWithValue("@reteta_id", aperitiv.RetetaId);
+                        com.Parameters.AddWithValue("@ingredient_id", aperitiv.IngredientId);
+                        com.ExecuteNonQuery();
+                        com.Parameters.Clear();
+                    }
+
+                    tx.Commit();
+                    Console.WriteLine("Datele au fost adăugate cu succes.");
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine("Eroare la adăugarea datelor: " + ex.Message);
+                    tx.Rollback();
+                }
+            }
+        }
+    }
+
+    internal class Aperitive
+    {
+        public int Id { get; set; }
+        public string Nume { get; set; }
+        public string Descriere { get; set; }
+        public decimal Pret { get; set; }
+        public int RetetaId { get; set; }
+        public int IngredientId { get; set; }
+
+        public Aperitive(int id, string nume, string descriere, decimal pret, int retetaId, int ingredientId)
+        {
+            Id = id;
+            Nume = nume;
+            Descriere = descriere;
+            Pret = pret;
+            RetetaId = retetaId;
+            IngredientId = ingredientId;
+        }
+    }
+}
