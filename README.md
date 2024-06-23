@@ -1,8 +1,8 @@
-# Andreea's Cooking App
+# Andreea's Cooking App ( Program.cs )
 
 ## Descriere
 
-Acest program creează și populează o bază de date MySQL pentru aplicația "Andreea's Cooking". Baza de date include tabele pentru rețete, ingrediente și aperitive.
+Acest program creează și populează o bază de date phpMyAdmin pentru aplicația "Andreea's Cooking". Baza de date include tabele pentru rețete, ingrediente și aperitive. Si e facut in C#.
 
 ## Structura Codului
 
