@@ -2,7 +2,7 @@
 
 ## Descriere
 
-Acest program creează și populează o bază de date phpMyAdmin pentru aplicația "Andreea's Cooking". Baza de date include tabele pentru rețete, ingrediente și aperitive. Si e facut in C#.
+Acest program creează și populează o bază de date phpMyAdmin pentru aplicația "Andreea's Cooking". Baza de date include tabele pentru rețete, ingrediente și aperitive.
 
 ## Structura Codului
 
